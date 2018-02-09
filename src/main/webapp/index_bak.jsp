@@ -352,8 +352,9 @@
     	
     	//发送消息事件
     	var sendMsg = function(){
-    		localChannel.send($("#message").val());
-    		addYouMsg($("#message").val(),"right");
+    		var param = {'type':'text','data':$("#message").val()};
+    		localChannel.send(JSON.stringify(param));
+    		addYouMsg(param.data,"right");
     		$("#message").val("");
     	}
     	
@@ -430,6 +431,30 @@
     			$("#openVideo").show();
     		}
     	});
+    	
+    	//发送文件
+    	$("#fileMsg").on("change",function(){
+    		var fileData = this.files[0];
+    		var fileSize = fileData.size;
+    		var fileName = fileData.name;
+    		var sendMaxSize = 1000;//设定每次发送的最大字节
+    		var param = {'type':'file','data':{'fileSize':fileSize,'fileName':fileName}};
+    		localChannel.send(JSON.stringify(param));//给远方发送即将要发送的文件信息
+    		var fileReader = new FileReader();
+    		fileReader.onload = function(){//每次加载数据后则发送过去
+				localChannel.send(fileReader.result);//给远方传送文件数据
+				if(done < fileSize){
+					tempLoad();
+				}
+			}
+    		var done = 0;
+    		var tempLoad = function(){
+    			fileReader.readAsArrayBuffer(fileData.slice(done,sendMaxSize + done));
+    			done = done + sendMaxSize;
+    		}
+    		tempLoad();
+    		$(this).val("");
+    	});
     </script>
     
     <!-- websocket 处理 -->
@@ -497,10 +522,37 @@
         }
         
         //客户端连接回调方法
+        var downloadFileData = {'maxsize':0,'filename':null,'data':[]};//下载文件数据预存
       	var pc_datachannel = function(event) {
       		receiveChannel = event.channel;//远端的数据通道,注意,这个通道也是可以直接使用的,不过由于它是远端的数据通道,响应的消息会出现在 localChannel.onmessage里面,而不是 receiveChannel.onmessage
             receiveChannel.onmessage = function(event){
-            	addYouMsg(event.data,"left");
+            	var msg = null
+            	try{
+            		msg = JSON.parse(event.data);
+            	}catch(e){
+            		if(downloadFileData.filename != null){
+            			downloadFileData.data.push(event.data);
+            			 var doneSize = 0;
+            			 for(var i = 0 ; i < downloadFileData.data.length ; i++){
+            				 doneSize += downloadFileData.data[i].byteLength;
+            			 }
+            			 if(downloadFileData.maxsize <= doneSize){//如果已完成长度 <= 最大长度,则代表传输结束
+            				var fileBlob = new Blob(downloadFileData.data);
+            				var anchor = document.createElement("a");
+            				anchor.href = URL.createObjectURL(fileBlob);
+            				anchor.download = downloadFileData.filename;
+            				anchor.click();
+            				downloadFileData = {'maxsize':0,'filename':null,'data':[]};//初始化
+            			 }
+            		}
+            		return;
+            	}
+            	if(msg.type == 'text'){//接收的是文字传送,当作是聊天文字
+            		 addYouMsg(msg.data,"left");
+            	}else if(msg != null && msg.type == 'file'){//接收到了对方发来的即将要传送的文件信息
+	       			 downloadFileData.maxsize = msg.data.fileSize;
+	      			 downloadFileData.filename = msg.data.fileName;
+         	    }
             }
         };
         
