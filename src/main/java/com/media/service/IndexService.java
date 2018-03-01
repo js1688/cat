@@ -2,8 +2,9 @@ package com.media.service;
 
 import javax.websocket.Session;
 
-import com.media.code.OneReadyResponseCode;
-import com.media.storage.PersonalReadyStorage;
+import com.media.config.OneReadyResponseConfig;
+import com.media.storage.FiveHomeStorage;
+import com.media.storage.OneReadyStorage;
 import com.media.storage.PersonalSessionStorage;
 
 /**
@@ -23,8 +24,12 @@ public class IndexService{
 			if(session == null){
 				return false;
 			}
-			//查询它是否正在对话
-			if(PersonalReadyStorage.isReady(id)){
+			//查询它是否正在一对一对话
+			if(OneReadyStorage.isReady(id)){
+				return false;
+			}
+			//查询它是否正在群组对话
+			if(FiveHomeStorage.isReady(id)){
 				return false;
 			}
 			return true;
@@ -38,14 +43,13 @@ public class IndexService{
 	 * @param id
 	 * @return
 	 */
-	public static Session readyForOne(String thisId,String id){
-		if(PersonalReadyStorage.isReady(thisId)){//自己已经准备过,取消准备
-			PersonalReadyStorage.delCall(thisId);
+	public static String readyForOne(String thisId,String id){
+		if(OneReadyStorage.isReady(thisId)){//自己已经准备过,取消准备
+			OneReadyStorage.delCall(thisId);
 		}else{
 			if(IndexService.queryId(thisId,id)){//再次检测对方是否可以对话,结果为可发起对话
-				Session answerSession = PersonalSessionStorage.getSessionById(id);
-				PersonalReadyStorage.addCall(thisId, id);//添加发起准备的信息
-				return answerSession;
+				OneReadyStorage.addCall(thisId, id);//添加发起准备的信息
+				return id;
 			}
 		}
 		return null;
@@ -59,57 +63,82 @@ public class IndexService{
 	 * @param is
 	 * @return
 	 */
-	public static OneReadyResponseCode readyForOneResponse(String thisId,boolean is){
-		OneReadyResponseCode map = new OneReadyResponseCode();
-		String callId = PersonalReadyStorage.answerOkReady(thisId);
+	public static OneReadyResponseConfig readyForOneResponse(String thisId,boolean is){
+		OneReadyResponseConfig map = new OneReadyResponseConfig();
+		String callId = OneReadyStorage.answerOkReady(thisId);
 		if(callId == null){//呼叫方取消了准备
-			Session answerSession = PersonalSessionStorage.getSessionById(thisId);
 			map.setMsg("呼叫方取消了准备");
 			map.setStatus(false);
-			map.setSession(answerSession);
+			map.setOfferId(thisId);
 			return map;
 		}
-		Session callSession = PersonalSessionStorage.getSessionById(callId);
 		map.setMsg("对方"+(is ? "同意" : "拒绝")+"对话");
 		map.setStatus(is);
-		map.setSession(callSession);
 		map.setAnswerId(thisId);
+		map.setOfferId(callId);
 		return map;
 	}
 	
 	/**
-	 * 发送信令给对方,这里不管是应答者 还是 提供者
+	 * 发送信令给对方,这里不区分是群组 还是个人,还是呼叫方或者是应答方,总之会找到对方并发给它
 	 * @param thisId
 	 * @return
 	 */
-	public static OneReadyResponseCode signallingOffer(String thisId){
-		OneReadyResponseCode map = new OneReadyResponseCode();
+	public static OneReadyResponseConfig signallingOffer(String thisId){
+		OneReadyResponseConfig map = new OneReadyResponseConfig();
 		//先找到当前发送者与谁建立了对话关系
-		String answerId = PersonalReadyStorage.findReadyAnswerBycallId(thisId);
+		String answerId = OneReadyStorage.findReadyAnswerBycallId(thisId);
 		if(answerId == null){//非法发送信令,根本不存在通话准备信息
-			map.setMsg("非法发送信令,根本不存在通话准备信息");
-			map.setSession(PersonalSessionStorage.getSessionById(thisId));
-			map.setStatus(false);
-			return map;
-		}else{//通话准备信息验证正确,转发信令
-			map.setSession(PersonalSessionStorage.getSessionById(answerId));
-			map.setStatus(true);
+			if(answerId == null){
+				map.setMsg("非法发送信令,根本不存在通话准备信息");
+				map.setStatus(false);
+				map.setAnswerId(thisId);
+				return map;
+			}
 		}
+		map.setStatus(true);
+		map.setAnswerId(answerId);
 		return map;
 	}
 
 	/**
-	 * 关闭双方的对话准备,并且返回对方的session
+	 * 关闭双方的对话准备,并且返回对方的id
 	 * @param thisId
 	 * @return
 	 */
-	public static Session oneChannelClose(String thisId){
-		String answerId = PersonalReadyStorage.findReadyAnswerBycallId(thisId);
+	public static String oneChannelClose(String thisId){
+		String answerId = OneReadyStorage.findReadyAnswerBycallId(thisId);
 		if(answerId == null){
 			return null;
 		}
 		//删掉双方的对话准备
-		PersonalReadyStorage.readyClose(thisId, answerId);
-		return PersonalSessionStorage.getSessionById(answerId);
+		OneReadyStorage.readyClose(thisId, answerId);
+		return answerId;
+	}
+	
+	/**
+	 * 创建房间
+	 * @return
+	 */
+	public static String createHome(){
+		return FiveHomeStorage.createHome();
+	}
+	
+	/**
+	 * 用户加入一个房间
+	 * @param userId
+	 * @param homeId
+	 */
+	public static boolean addHome(String userId,String homeId){
+		return FiveHomeStorage.addHome(userId, homeId);
+	}
+	
+	/**
+	 * 用户退出房间
+	 * 如果退出后房间里面没有人了,则删除房间
+	 * @param userId
+	 */
+	public static void exitHome(String userId){
+		FiveHomeStorage.exitHome(userId);
 	}
 }

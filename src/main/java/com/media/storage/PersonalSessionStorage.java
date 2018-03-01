@@ -1,7 +1,7 @@
 package com.media.storage;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.websocket.Session;
 
@@ -11,7 +11,7 @@ import javax.websocket.Session;
  *
  */
 public class PersonalSessionStorage {
-	private static final HashMap<String,Session> storage = new HashMap<String,Session>();
+	private static final ConcurrentHashMap<String,Session> storage = new ConcurrentHashMap<String,Session>();
 	
 	/**
 	 * 通过一个id获得这个session
@@ -28,9 +28,7 @@ public class PersonalSessionStorage {
 	 * @param sio
 	 */
 	public static void addSessionById(String id,Session sio){
-		synchronized(storage){
-			storage.put(id, sio);
-		}
+		storage.put(id, sio);
 	}
 	
 	/**
@@ -38,13 +36,11 @@ public class PersonalSessionStorage {
 	 * @param id
 	 */
 	public static void delSessionById(String id){
-		synchronized(storage){
-			try {
-				storage.get(id).close();
-				storage.remove(id);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+		try {
+			storage.get(id).close();
+			storage.remove(id);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 }

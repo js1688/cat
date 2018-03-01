@@ -1,4 +1,4 @@
-package com.media.code;
+package com.media.config;
 
 import javax.websocket.Session;
 
@@ -7,18 +7,24 @@ import javax.websocket.Session;
  * @author tanjun
  *
  */
-public class OneReadyResponseCode {
-	private Session session;
-	
+public class OneReadyResponseConfig {
 	private boolean status;
 	
 	private String msg;
 	
 	private String answerId;
 	
-	
+	private String offerId;
 
 	
+	
+	public String getOfferId() {
+		return offerId;
+	}
+
+	public void setOfferId(String offerId) {
+		this.offerId = offerId;
+	}
 
 	public String getAnswerId() {
 		return answerId;
@@ -26,14 +32,6 @@ public class OneReadyResponseCode {
 
 	public void setAnswerId(String answerId) {
 		this.answerId = answerId;
-	}
-
-	public Session getSession() {
-		return session;
-	}
-
-	public void setSession(Session session) {
-		this.session = session;
 	}
 
 	public boolean isStatus() {

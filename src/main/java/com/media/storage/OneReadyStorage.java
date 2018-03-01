@@ -1,17 +1,17 @@
 package com.media.storage;
 
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
-import com.media.code.OneReadyCode;
+import com.media.config.OneReadyConfig;
 
 /**
  * 个人对话准备存储
  * @author tanjun
  *
  */
-public class PersonalReadyStorage {
-	private static final HashMap<String/*发起呼叫方id*/,OneReadyCode> call = new HashMap<String,OneReadyCode>();
-	private static final HashMap<String/*应答方id*/,OneReadyCode> answer = new HashMap<String,OneReadyCode>();
+public class OneReadyStorage {
+	private static final ConcurrentHashMap<String/*发起呼叫方id*/,OneReadyConfig> call = new ConcurrentHashMap<String,OneReadyConfig>();
+	private static final ConcurrentHashMap<String/*应答方id*/,OneReadyConfig> answer = new ConcurrentHashMap<String,OneReadyConfig>();
 	
 	/**
 	 * 返回一个id是否正在对话
@@ -33,18 +33,14 @@ public class PersonalReadyStorage {
 	 * @param answerId
 	 */
 	public static void addCall(String callId,String answerId){
-		synchronized (call) {
-			OneReadyCode oc = new OneReadyCode();
-			oc.setRemoteId(answerId);
-			oc.setStatus(false);
-			call.put(callId, oc);
-		}
-		synchronized (answer) {
-			OneReadyCode oc = new OneReadyCode();
-			oc.setRemoteId(callId);
-			oc.setStatus(false);
-			answer.put(answerId,oc);
-		}
+		OneReadyConfig oc1 = new OneReadyConfig();
+		oc1.setRemoteId(answerId);
+		oc1.setStatus(false);
+		call.put(callId, oc1);
+		OneReadyConfig oc2 = new OneReadyConfig();
+		oc2.setRemoteId(callId);
+		oc2.setStatus(false);
+		answer.put(answerId,oc2);
 	}
 	
 	/**
@@ -52,16 +48,12 @@ public class PersonalReadyStorage {
 	 * @param callId
 	 */
 	public static void delCall(String callId){
-		OneReadyCode answerId = call.get(callId);
+		OneReadyConfig answerId = call.get(callId);
 		if(answerId == null){
 			return;
 		}
-		synchronized (call) {
-			call.remove(callId);
-		}
-		synchronized (answer) {
-			answer.remove(answerId.getRemoteId());
-		}
+		call.remove(callId);
+		answer.remove(answerId.getRemoteId());
 	}
 	
 	/**
@@ -69,16 +61,12 @@ public class PersonalReadyStorage {
 	 * @param callId
 	 */
 	public static void delAnswer(String answerId){
-		OneReadyCode callId = answer.get(answerId);
+		OneReadyConfig callId = answer.get(answerId);
 		if(callId == null){
 			return;
 		}
-		synchronized (call) {
-			call.remove(callId.getRemoteId());
-		}
-		synchronized (answer) {
-			answer.remove(answerId);
-		}
+		call.remove(callId.getRemoteId());
+		answer.remove(answerId);
 	}
 	
 	/**
@@ -89,12 +77,12 @@ public class PersonalReadyStorage {
 	 */
 	public static String answerOkReady(String answerId){
 		//设置双方都为准备状态
-		OneReadyCode callOc = answer.get(answerId);
+		OneReadyConfig callOc = answer.get(answerId);
 		if(callOc == null){//呼叫方已经取消准备
 			return null;
 		}
 		callOc.setStatus(true);
-		OneReadyCode answerOc = call.get(callOc.getRemoteId());
+		OneReadyConfig answerOc = call.get(callOc.getRemoteId());
 		answerOc.setStatus(true);
 		return callOc.getRemoteId();
 	}
@@ -105,9 +93,9 @@ public class PersonalReadyStorage {
 	 * @return
 	 */
 	public static String findReadyAnswerBycallId(String thisId){
-		OneReadyCode callOc = call.get(thisId);
+		OneReadyConfig callOc = call.get(thisId);
 		if(callOc == null){
-			OneReadyCode answerOc = answer.get(thisId);
+			OneReadyConfig answerOc = answer.get(thisId);
 			if(answerOc == null){
 				return null;
 			}
@@ -126,13 +114,9 @@ public class PersonalReadyStorage {
 	 * @param thisId
 	 */
 	public static void readyClose(String id1,String id2){
-		synchronized (call) {
-			call.remove(id1);
-			call.remove(id2);
-		}
-		synchronized (answer) {
-			answer.remove(id2);
-			answer.remove(id1);
-		}
+		call.remove(id1);
+		call.remove(id2);
+		answer.remove(id2);
+		answer.remove(id1);
 	}
 }
