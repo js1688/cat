@@ -47,6 +47,38 @@
     		var video = $("#dialogForFive video[name='video']").get(0); //获取到展现视频的标签
     	    video.src = window.URL.createObjectURL(stream);//写入
     	}
+    	
+    	//发送文件
+    	$("#fileMsgForFive").on("change",function(){
+    		var fileData = this.files[0];
+    		var fileSize = fileData.size;
+    		var fileName = fileData.name;
+    		var sendMaxSize = 1000;//设定每次发送的最大字节
+    		var param = {'type':'file','data':{'fileSize':fileSize,'fileName':fileName}};
+    		for(var key in fiveWebRtc){
+    			fiveWebRtc[key].localChannel.send(JSON.stringify(param));//给远方发送即将要发送的文件信息
+    		}
+    		for(var i = 0; i < fiveWebRtc.length; i++){
+    			
+    		}
+    		var fileReader = new FileReader();
+    		fileReader.onload = function(){//每次加载数据后则发送过去
+    			for(var key in fiveWebRtc){
+    				fiveWebRtc[key].localChannel.send(fileReader.result);//给每个远方传送文件数据
+    			}
+    			if(done < fileSize){
+    				tempLoad();
+    			}
+    		}
+    		var done = 0;
+    		var tempLoad = function(){
+    			fileReader.readAsArrayBuffer(fileData.slice(done,sendMaxSize + done));
+    			done = done + sendMaxSize;
+    		}
+    		tempLoad();
+    		$(this).val("");
+    	});
+    	
     	//发送文字消息
     	var sendMessageFive = function(){
     		var localChannels = [];
