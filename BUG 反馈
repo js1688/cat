@@ -1,0 +1,5 @@
+哥们为了交流，能留下 个联系方式 么？
+试了你的在线 https://www.tanjun.xyz/  不成功，返回 发送信令失败:InvalidStateError: Cannot create offer in state have-local-offer ，
+下了你的源码也是  报 发送信令失败:InvalidStateError: Cannot create offer in state have-local-offer 这个错误，是不是有问题没有更新了，
+还有为什么 不使用 adapter.js 来提高兼容性呢？
+方便 一起 讨论么  ，我的联系方式 为 qq:350078238
