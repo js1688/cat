@@ -224,6 +224,9 @@
         			if(webRtcs[i].stream.getAudioTracks()[0]){
         				webRtcs[i].stream.getAudioTracks()[0].stop();
         			}
+        			if(webRtcs[i].stream.getTracks()[0]){
+        				webRtcs[i].stream.getTracks()[0].stop();
+        			}
         			webRtcs[i].pc.removeStream(webRtcs[i].stream);
         			webRtcs[i].stream = null;
         			webRtcs[i].isVideoAudio = true;
@@ -239,6 +242,9 @@
     			}
     			if(localStream.getAudioTracks()[0]){
     				localStream.getAudioTracks()[0].stop();
+    			}
+    			if(localStream.getTracks()[0]){
+    				localStream.getTracks()[0].stop();
     			}
     			localStream = null;
     		}

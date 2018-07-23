@@ -118,9 +118,8 @@ public class IndexController {
     }  
 
     @OnError
-    public void onError(Session session, Throwable t) {
+    public void onError(Throwable t) {
     	t.printStackTrace();
-    	close(session);
     }
     
     @OnClose  
@@ -130,6 +129,12 @@ public class IndexController {
 	    	PersonalSessionStorage.delSessionById(session.getId());
     	}catch(Throwable e){
     		e.printStackTrace();
+    	}finally {
+    		try {
+				session.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
     	}
     }  
     
