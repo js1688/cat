@@ -85,7 +85,9 @@
     		for(var key in fiveWebRtc){
     			localChannels.push(fiveWebRtc[key].localChannel);
     		}
-    		sendMessage(localChannels,"dialogForFive");
+    		if(localChannels.length != 0 ){
+    			sendMessage(localChannels,"dialogForFive");
+    		}
     	}
     	
     	//点击开启视频触发事件
@@ -104,7 +106,7 @@
     			$("#dialogForFive button[name='openAudio']").hide();
     		}else{//关闭视频语音聊天
     			closeRemoteChannelStream(pcs);
-    			closeLocalStream()
+    			closeLocalStream();
     			resetVideoButton();
     		}
     	});
@@ -123,7 +125,7 @@
     			$("#dialogForFive button[name='openVideo']").hide();
     		}else{//关闭语音聊天
     			closeRemoteChannelStream(pcs);
-    			closeLocalStream()
+    			closeLocalStream();
     			resetVideoButton();
     		}
     	});
@@ -131,12 +133,16 @@
     	var CREATE_GROUP_FIVE = function(message){
     		$("#dialogForFive label[name='name']").html(message.value);
 			$("#dialogForFive").modal('show');
+			$("#dialogForFive button[name='openVideo']").data("use",false);
+    		$("#dialogForFive button[name='openAudio']").data("use",false);
     	}
     	var QUERY_GROUP_FIVE = function(message){
     		if(message.value != null){
     			var value = JSON.parse(message.value);
 				$("#dialogForFive label[name='name']").html(value.homeId);
 				$("#dialogForFive").modal('show');
+				$("#dialogForFive button[name='openVideo']").data("use",false);
+	    		$("#dialogForFive button[name='openAudio']").data("use",false);
 				//创建房间内其他几个人的pc
 				for(var i = 0 ; i < value.userIds.length ; i++){
 					var webrtc = createPcAndDataChannel(callbackMessageFiveImpl,callbackRemoteVideoFiveImpl);//创建webrtc对象

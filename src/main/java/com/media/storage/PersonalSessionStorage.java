@@ -37,8 +37,10 @@ public class PersonalSessionStorage {
 	 */
 	public static void delSessionById(String id){
 		try {
-			storage.get(id).close();
-			storage.remove(id);
+			if(storage.get(id) != null) {
+				Session ts = storage.remove(id);
+				ts.close();
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

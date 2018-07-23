@@ -33,8 +33,8 @@ var socket_onmessage = function(event){
 	}
 }
 
-//var socket = new WebSocket("wss://www.tanjun.xyz/cat/index");
-var socket = new WebSocket("ws://127.0.0.1:1688/cat/index");
+var socket = new WebSocket("wss://www.tanjun.xyz/cat/index");
+//var socket = new WebSocket("ws://127.0.0.1:8080/cat/index");
 		
 socket.onopen = function(){
 	console.log("WebSocket,建立连接成功");

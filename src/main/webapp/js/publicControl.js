@@ -4,6 +4,8 @@
  */
 $('#query-tabs li:eq(0) a').tab('show');//个人 群组 切换事件
 
+alert("请使用谷歌浏览器,并且电脑有麦克风,摄像头等设备,可以开两个浏览器模拟聊天。有兴趣的可以关注一下我github上的第二个项目,12306自动抢票,python语言");
+
 //添加好友发送的内容到聊天面板 is_i的参数为 left 或者 right  left代表别人说的话,right代表自己说的话 showId代表添加到哪个聊天框框去
 var showMessage = function(showId,message,is_i){
 	var li = $('<li class="bubbleItem clearfix">');
@@ -51,6 +53,18 @@ var resetVideoButton = function(){
 	openVideo.removeClass("active");
 	openAudio.removeClass("active");
 }
+//通用触发发送文字
+var pubSendMessage = function(){
+	sendMessageFive();
+	sendMessageOne();
+}
+//回车
+$(document).keyup(function(event){
+	  if(event.keyCode ==13){
+		  pubSendMessage();
+	  }
+});
+
 //------------------websocket 消息类型处理逻辑
 var PERSONAL_ID = function(message){
 	$("#identity").html(message.value);

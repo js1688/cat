@@ -129,7 +129,7 @@
 		            </div>
 		            <div class="modal-footer">
 		                <button type="button" class="btn btn-default" name="close">关闭对话</button>
-		                <button type="button" class="btn btn-success" onclick="sendMessageOne()">发送消息</button>
+		                <button type="button" class="btn btn-success" onkeypress="EnterPress(event)" onkeydown="EnterPress()" onclick="pubSendMessage()">发送消息[Enter]</button>
 		            </div>
 		        </div>
 		    </div>
@@ -229,7 +229,7 @@
 		            </div>
 		            <div class="modal-footer">
 		                <button type="button" class="btn btn-default" name="close">关闭对话</button>
-		                <button type="button" class="btn btn-success" onclick="sendMessageFive()">发送消息</button>
+		                <button type="button" class="btn btn-success" onkeypress="EnterPress(event)" onkeydown="EnterPress()" onclick="pubSendMessage()">发送消息[Enter]</button>
 		            </div>
 		        </div>
 		    </div>

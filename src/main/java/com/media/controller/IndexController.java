@@ -118,8 +118,9 @@ public class IndexController {
     }  
 
     @OnError
-    public void onError(Throwable t) {
-    	System.out.println(t.getMessage());
+    public void onError(Session session, Throwable t) {
+    	t.printStackTrace();
+    	close(session);
     }
     
     @OnClose  
