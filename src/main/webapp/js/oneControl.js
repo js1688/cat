@@ -33,12 +33,22 @@ var callbackMessageOneImpl = function(msg){
 }
 //一对一接收到媒体流,处理回调实现
 var callbackRemoteVideoOneImpl = function(event){
-	$("#dialogForOne video[name='remote']").get(0).src = URL.createObjectURL(event.stream);
+	//$("#dialogForOne video[name='remote']").get(0).src = URL.createObjectURL(event.stream);
+    var video = $("#dialogForOne video[name='remote']").get(0);
+    video.srcObject = event.stream;
+    video.onloadedmetadata = function(e) {
+        video.play();
+    };
 }
 //一对一本地媒体流展示,实现回调
 var callbackLocalVideoOneImpl = function(stream){
-	var video = $("#dialogForOne video[name='video']").get(0); //获取到展现视频的标签
-    video.src = window.URL.createObjectURL(stream);//写入
+	//var video = $("#dialogForOne video[name='video']").get(0); //获取到展现视频的标签
+    //video.src = window.URL.createObjectURL(stream);//写入
+    var video = $("#dialogForOne video[name='video']")[0]; //获取到展现视频的标签
+    video.srcObject=stream;
+    video.onloadedmetadata = function(e) {
+        video.play();
+    };
 }
 $("#answerShow button[name='ready']").on("click",function(){//响应准备
 	var param = {key:'READY_FOR_ONE_RESPONSE',value:true};

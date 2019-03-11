@@ -37,15 +37,24 @@
     		var remotes = $("#dialogForFive video[name='remote']");
     		for(var i = 0 ; i < remotes.length ; i++){
     			if($(remotes[i]).data("remoteId") == event.target.remoteUserId){//找到占用的视频位置
-    				$(remotes[i]).get(0).src = URL.createObjectURL(event.stream);
+    				//$(remotes[i]).get(0).src = URL.createObjectURL(event.stream);
+                    $(remotes[i]).get(0).srcObject = event.stream;
+                    $(remotes[i]).get(0).onloadedmetadata = function(e) {
+                        $(remotes[i]).get(0).play();
+                    };
     				break;
     			}
     		}
     	}
     	//五人群组本地媒体流展示,实现回调
     	var callbackLocalVideoFiveImpl = function(stream){
-    		var video = $("#dialogForFive video[name='video']").get(0); //获取到展现视频的标签
-    	    video.src = window.URL.createObjectURL(stream);//写入
+    		// var video = $("#dialogForFive video[name='video']").get(0); //获取到展现视频的标签
+    	    // video.src = window.URL.createObjectURL(stream);//写入
+            var video = $("#dialogForFive video[name='video']").get(0);
+            video.srcObject = stream;
+            video.onloadedmetadata = function(e) {
+                video.play();
+            };
     	}
     	
     	//发送文件
