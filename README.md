@@ -1,11 +1,7 @@
 # cat
+如果你们希望这个项目用nginx代理https 那就把web.xml中的内容删掉,如果是用tomcat部署https协议就不用删除.
 2019年03月13日10:39:12 今天提交更新是以前webrtc老api不可以使用了,换成了新api,
-最新
-最新演示
-最新演示地址
-:www
-.cat08.com
-
+www.cat08.com
 源码地址:https://github.com/js1688/cat08
 
 
